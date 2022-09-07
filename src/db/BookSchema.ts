@@ -6,7 +6,7 @@ import {Realm} from '@realm/react';
  * summary
  * ISBN
  * Author
- * Acquired
+ * purchased
  */
 
 export class BookSchema extends Realm.Object {
@@ -16,12 +16,14 @@ export class BookSchema extends Realm.Object {
   isbn!: string;
   author!: string;
   createdAt!: Date;
+  purchased!: boolean;
 
   static generate(
     title: string,
     summary: string,
     isbn: string,
     author: string,
+    purchased?: boolean,
   ) {
     return {
       _id: new Realm.BSON.ObjectId(),
@@ -30,6 +32,7 @@ export class BookSchema extends Realm.Object {
       isbn,
       author,
       createdAt: new Date(),
+      purchased,
     };
   }
 
@@ -43,6 +46,7 @@ export class BookSchema extends Realm.Object {
       isbn: 'string',
       author: 'string',
       createdAt: 'date',
+      purchased: {type: 'bool', default: false},
     },
   };
 }
