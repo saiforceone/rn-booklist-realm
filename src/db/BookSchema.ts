@@ -37,7 +37,7 @@ export class BookSchema extends Realm.Object {
   }
 
   static schema = {
-    name: 'BookList',
+    name: 'Book',
     primaryKey: '_id',
     properties: {
       _id: 'objectId',
@@ -49,4 +49,14 @@ export class BookSchema extends Realm.Object {
       purchased: {type: 'bool', default: false},
     },
   };
+}
+
+export interface BookData {
+  _id?: Realm.BSON.ObjectId;
+  createdAt?: Date;
+  title: string;
+  summary: string;
+  isbn: string;
+  author: string;
+  purchased?: boolean;
 }
