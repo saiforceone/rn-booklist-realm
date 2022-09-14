@@ -38,6 +38,10 @@ export const BookFormModal: FC<BookFormModalProps> = ({
     if (visible && book) {
       setBookData(book);
     }
+
+    if (visible && !book) {
+      setBookData(DEFAULT_BOOK_DATA);
+    }
   }, [visible, book]);
 
   const updateBookData = useCallback((key: string, value: string) => {
@@ -52,7 +56,16 @@ export const BookFormModal: FC<BookFormModalProps> = ({
           .filter(k => k !== '_id')
           .forEach(dataKey => {
             book[dataKey] = bookData[dataKey];
-        });
+          });
+        saveBookAction();
+      } else {
+        const newBook = BookSchema.generate(
+          bookData.title,
+          bookData.summary,
+          bookData.isbn,
+          bookData.author,
+        );
+        realm.create('Book', newBook);
         saveBookAction();
       }
     });

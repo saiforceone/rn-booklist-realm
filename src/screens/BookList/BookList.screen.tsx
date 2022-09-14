@@ -1,17 +1,19 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {Alert, FlatList, View} from 'react-native';
+import {FAB} from 'react-native-paper';
 import {BookItem} from '../../components/BookItem/BookItem';
 import {EmptyListCard} from '../../components/EmptyListCard/EmptyListCard';
 import realmContext from '../../db';
 import {BookSchema} from '../../db/BookSchema';
 import {BookFormModal} from '../../modals/BookForm/BookForm.modal';
 
+import BookListScreenStyles from './BookListScreen.styles';
+
 const {useRealm, useQuery} = realmContext;
 
 export const BookListScreen = () => {
   // state
-  const [selectedBook, setSelectedBook] = useState<
-    (BookSchema & Realm.Object) | undefined
+  const [selectedBook, setSelectedBook] = useState<(BookSchema & Realm.Object) | undefined
   >();
   const [bookFormVisible, setBookFormVislble] = useState(false);
   // hooks
@@ -89,6 +91,11 @@ export const BookListScreen = () => {
           setSelectedBook(undefined);
           setBookFormVislble(false);
         }}
+      />
+      <FAB
+        icon="plus"
+        style={BookListScreenStyles.fab}
+        onPress={() => setBookFormVislble(true)}
       />
     </View>
   );
