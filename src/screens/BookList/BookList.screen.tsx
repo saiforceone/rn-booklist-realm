@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {Alert, FlatList, View} from 'react-native';
 import {FAB, Portal} from 'react-native-paper';
 import {BookItem} from '../../components/BookItem/BookItem';
@@ -12,17 +12,31 @@ import BookListScreenStyles from './BookListScreen.styles';
 
 const {useRealm, useQuery} = realmContext;
 
+type ActiveModal = 'editForm' | 'bookSearch' | 'none';
+
 export const BookListScreen = () => {
   // state
-  const [selectedBook, setSelectedBook] = useState<(BookSchema & Realm.Object) | undefined
+  const [selectedBook, setSelectedBook] = useState<
+    (BookSchema & Realm.Object) | undefined
   >();
   const [bookFormVisible, setBookFormVislble] = useState(false);
   const [bookSearchVisible, setBookSearchVisible] = useState(false);
+  const [activeModal, setActiveModal] = useState<ActiveModal>('none');
   const [fabState, setFabState] = useState({open: false});
 
   // hooks
   const realm = useRealm();
   const bookList = useQuery(BookSchema);
+
+  useEffect(() => {
+    if (bookFormVisible) {
+      setActiveModal('editForm');
+    } else if (bookSearchVisible) {
+      setActiveModal('bookSearch');
+    } else {
+      setActiveModal('none');
+    }
+  }, [bookFormVisible, bookSearchVisible]);
 
   const deleteBook = useCallback(
     (book: BookSchema & Realm.Object) => {
@@ -47,7 +61,7 @@ export const BookListScreen = () => {
   );
 
   return (
-    <View style={{flex: 1}}>
+    <View style={BookListScreenStyles.container}>
       <FlatList
         data={bookList}
         keyExtractor={item => item._id.toHexString()}
@@ -97,15 +111,19 @@ export const BookListScreen = () => {
             {
               icon: 'book-search',
               label: 'Book Search',
-              onPress: () => setBookSearchVisible(true),
+              onPress: () => {
+                setBookSearchVisible(true);
+              },
             },
             {
               icon: 'book-plus',
               label: 'Add Book',
-              onPress: () => setBookFormVislble(true),
+              onPress: () => {
+                setBookFormVislble(true);
+              },
             },
           ]}
-          visible={!bookFormVisible || !bookSearchVisible}
+          visible={activeModal === 'none'}
         />
       </Portal>
     </View>

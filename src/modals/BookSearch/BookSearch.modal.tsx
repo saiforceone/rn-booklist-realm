@@ -1,6 +1,13 @@
 import React, {FC, useCallback, useState} from 'react';
-import {Alert, ScrollView, View} from 'react-native';
-import {IconButton, Modal, Portal, Text, TextInput} from 'react-native-paper';
+import {Alert, FlatList, ScrollView, View} from 'react-native';
+import {
+  Button,
+  IconButton,
+  Modal,
+  Portal,
+  Text,
+  TextInput,
+} from 'react-native-paper';
 import {Header} from '../../components/Header/Header';
 import {OL_LEGACY_BOOK_SEARCH_URL} from '../../constants';
 import {BookResult} from '../../@types/bookResult';
@@ -11,6 +18,7 @@ import {NewBookData} from '../../@types/newBookData';
 
 import bookContext from '../../db';
 import {BookSchema} from '../../db/BookSchema';
+import {EmptyListCard} from '../../components/EmptyListCard/EmptyListCard';
 const {useRealm} = bookContext;
 
 interface BookSearchModalProps {
@@ -25,6 +33,7 @@ export const BookSearchModal: FC<BookSearchModalProps> = ({
   visible,
 }) => {
   // state
+  const [isFetching, setIsFetching] = useState(false);
   const [filterText, setFilterText] = useState('');
   const [bookResults, setBookResults] = useState<BookResult[]>([]);
   // hooks & functions
@@ -37,7 +46,7 @@ export const BookSearchModal: FC<BookSearchModalProps> = ({
         "Please enter the name of the book you'd like to search for.",
       );
     }
-
+    setIsFetching(true);
     fetch(`${OL_LEGACY_BOOK_SEARCH_URL}?q=${filterText}`)
       .then(response => response.json())
       .then(data => {
@@ -46,6 +55,9 @@ export const BookSearchModal: FC<BookSearchModalProps> = ({
           const books = docs as BookResult[];
           setBookResults(books);
         }
+      })
+      .finally(() => {
+        setIsFetching(false);
       });
   }, [filterText]);
 
@@ -58,6 +70,11 @@ export const BookSearchModal: FC<BookSearchModalProps> = ({
     },
     [realm, selectBookAction],
   );
+
+  const execReset = useCallback(() => {
+    setFilterText('');
+    setBookResults([]);
+  }, []);
 
   return (
     <Portal>
@@ -74,30 +91,44 @@ export const BookSearchModal: FC<BookSearchModalProps> = ({
             <TextInput
               mode="outlined"
               onChangeText={text => setFilterText(text)}
+              onBlur={() => {
+                execSearch();
+              }}
               placeholder="Type book name and tap button to search"
               style={BookSearchModalStyles.searchInput}
+              value={filterText}
             />
-            <IconButton icon="book-search" onPress={execSearch} />
+            <View style={BookSearchModalStyles.searchButtons}>
+              <Button
+                icon="book-search"
+                loading={isFetching}
+                onPress={execSearch}>
+                Search
+              </Button>
+              <Button
+                disabled={isFetching}
+                icon="book-sync"
+                onPress={execReset}>
+                Reset
+              </Button>
+            </View>
           </View>
-          <ScrollView
-            contentContainerStyle={BookSearchModalStyles.resultContainer}>
-            {bookResults.length ? (
-              bookResults.map((book, index) => (
+          <View style={BookSearchModalStyles.resultContainer}>
+            <FlatList
+              data={bookResults}
+              ListEmptyComponent={<EmptyListCard />}
+              renderItem={({item}) => (
                 <BookResultCard
-                  key={`book-${index}`}
-                  book={book}
+                  key={`book-${item}`}
+                  book={item}
                   selectBookAction={bookData => {
                     console.log('book data: ', bookData);
                     execSaveBook(bookData);
                   }}
                 />
-              ))
-            ) : (
-              <View>
-                <Text>No Results Yet</Text>
-              </View>
-            )}
-          </ScrollView>
+              )}
+            />
+          </View>
         </View>
       </Modal>
     </Portal>
