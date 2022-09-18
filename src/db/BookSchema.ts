@@ -1,4 +1,5 @@
 import {Realm} from '@realm/react';
+import {NewBookData} from '../@types/newBookData';
 
 /**
  * BookSchema
@@ -34,6 +35,16 @@ export class BookSchema extends Realm.Object {
       createdAt: new Date(),
       purchased,
     };
+  }
+
+  static generateWithObject(bookData: NewBookData) {
+    return this.generate(
+      bookData.title,
+      bookData.summary,
+      bookData.isbn,
+      bookData.author,
+      false,
+    );
   }
 
   static schema = {

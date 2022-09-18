@@ -55,6 +55,7 @@ export const BookFormModal: FC<BookFormModalProps> = ({
         Object.keys(bookData)
           .filter(k => k !== '_id')
           .forEach(dataKey => {
+            // @ts-ignore
             book[dataKey] = bookData[dataKey];
           });
         saveBookAction();
